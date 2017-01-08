@@ -21,10 +21,10 @@ void clearTrapFlag() {
 }
 
 
-long long int ccycle = 0;
+static long long int num_instructions = 0;
 /** trap handler executes for every instruction -- simply counts cycles */
 void trapHandler(int signo, siginfo_t *info, void *context) {
-  ccycle++;
+  num_instructions++;
 }
 
 
@@ -43,7 +43,7 @@ void startTrace() {
 void stopTrace() {
   clearTrapFlag();
 
-  printf("cycles: %lld\n", ccycle);
+  printf("num instructions: %lld\n", num_instructions);
 }
 
 
@@ -75,33 +75,9 @@ void loop(unsigned int totalNumInstructions) {
 
 
 int main(int argc, const char* argv[]) {
-  // don't trace if the first cmd line arg starts with 'n'
-  int traceIt = argc > 1 ? argv[1][0] != 'n' : 1;
-
-  // some computation
-  if (traceIt) startTrace();
-  loop(1000*1000*1000);
-  if (traceIt) stopTrace();
-  
-  // some syscalls (they have caused problems in the past)
-  if (traceIt) startTrace();
-  printf("rock\n");
-  printf("paper\n");
-  printf("scissors\n");
-  if (traceIt) stopTrace();
+  startTrace();
+  loop(10*1000*1000);
+  stopTrace();
 }
 
 
-/*
-//with debugging
-cycles: 100001991
-real12m51.636s
-user1m42.320s
-sys11m6.940s
-
-//without debugging
-real0m0.071s
-user0m0.068s
-sys0m0.004s
-
-*/

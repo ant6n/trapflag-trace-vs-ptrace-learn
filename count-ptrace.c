@@ -27,42 +27,39 @@ void run_target() {
     return;
   }
   
-  // to trace arbitrary program, use execl - for now just execute a loop
-  printf("start trace\n");
-  
-  // trap instruction starts ptrace
+  // to trace arbitrary program, use execl
+  // but we just use trap instruction to start ptrace...
   asm("int3\n" : : );
   
-  // the loop
+  // ...to execute the loop within the same program
   loop(1*1000*1000);
 }
 
 void run_debugger(pid_t child_pid) {
   int wait_status;
-  long long int ccycle = 0;
+  long long int num_instructions = 0;
   printf("debugger started\n");
 
   // wait for child to stop in its first instruction
   wait(&wait_status);
-  printf("first wait status: %d, stopped: %d\n", wait_status, WIFSTOPPED(wait_status));
   
   while (WIFSTOPPED(wait_status)) {
-    ccycle++;
+    num_instructions++;
     // make child execute another instruction
     if (ptrace(PTRACE_SINGLESTEP, child_pid, 0, 0) < 0) {
       perror("ptrace");
       return;
     }
-
-    if (ccycle % 10000 == 0) {
-      printf("cycle: %lld\n", ccycle);
+    
+    if (num_instructions % 100000 == 0) {
+      printf("cycle: %lld\n", num_instructions);
     }
 
     // wait for child to stop in its next instruction
     wait(&wait_status);
   }
   
-  printf("the child executed %lld instructions\n", ccycle);
+  printf("the child executed %lld instructions\n", num_instructions);
 }
 
 int main(int arc, char* argv[]) {
