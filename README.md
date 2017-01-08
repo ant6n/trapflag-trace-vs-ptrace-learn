@@ -18,4 +18,4 @@ This implies the following slow-downs of the different instrumentation schemes:
 * `101,172x` slower with ptrace
 * `  6,244x` slower with trapflag and x86
 
-This implies using the trapflag+signal handlers is 16x faster than using ptrace.
+This implies using the trapflag+signal handlers is about `16x` faster than using ptrace.
